@@ -1,85 +1,31 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open Any File in Browser</title>
-</head>
-<body>
-    <h1>Open Any File</h1>
-    <p>Click the button below to select a file. The content will be displayed below.</p>
-    <button onclick="openFile()">Open File</button>
-    
-    <!-- Area to display file content -->
-    <h2>File Content:</h2>
-    <div id="fileContent" style="border: 1px solid #ccc; padding: 10px; min-height: 200px; white-space: pre-wrap; font-family: monospace;">
-        <!-- Content will be loaded here -->
-    </div>
-    <p id="status"></p>
-
+    <title>Open Subframe/Pop-up</title>
     <script>
-        async function openFile() {
-            document.getElementById('status').textContent = '';
-            document.getElementById('fileContent').textContent = 'Loading file...';
-
-            if ('showOpenFilePicker' in window) {
-                // Modern approach using File System Access API
-                try {
-                    const [fileHandle] = await window.showOpenFilePicker();
-                    const file = await fileHandle.getFile();
-                    await displayFileContent(file);
-                } catch (err) {
-                    if (err.name !== 'AbortError') {
-                        document.getElementById('status').textContent = 'Error: ' + err.message;
-                    } else {
-                        document.getElementById('fileContent').textContent = '';
-                    }
-                }
+        function openNewWindow() {
+            // URL to be opened in the new window.
+            var url = 'https://google.com'; // Replace with your desired URL
+            
+            // Window features: width, height, and minimal UI elements.
+            // Modern browsers may still show an address bar for security.
+            var features = 'width=600,height=400,toolbar=no,menubar=no,location=no,status=no,resizable=yes';
+            
+            // Open the new window/pop-up.
+            var newWindow = window.open(url, '_blank', features);
+            
+            // Check if the pop-up was blocked
+            if (newWindow) {
+                newWindow.focus();
             } else {
-                // Fallback approach using a hidden input element
-                useInputFallback();
-            }
-        }
-
-        function useInputFallback() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.onchange = async (event) => {
-                const file = event.target.files[0];
-                if (file) {
-                    await displayFileContent(file);
-                } else {
-                    document.getElementById('fileContent').textContent = '';
-                }
-            };
-            input.click();
-        }
-
-        async function displayFileContent(file) {
-            document.getElementById('status').textContent = 'File selected: ' + file.name + ' (' + file.type + ')';
-            const contentArea = document.getElementById('fileContent');
-            contentArea.textContent = 'Displaying file content...'; // Clear previous content
-
-            if (file.type.startsWith('image/')) {
-                // Handle images: display as an img tag
-                const imgUrl = URL.createObjectURL(file);
-                contentArea.innerHTML = `<img src="${imgUrl}" alt="${file.name}" style="max-width: 100%; height: auto;">`;
-            } else if (file.type === 'text/html') {
-                // Handle HTML files: read as text, don't render directly for security/sandbox reasons
-                // You can read the text and display the source code, or use an iframe with a blob URL
-                const text = await file.text();
-                // Displaying source code in a pre-wrap div
-                contentArea.textContent = text;
-            } else if (file.type.startsWith('text/') || file.type === 'application/json') {
-                // Handle text files (txt, css, js, json, etc.): read as text
-                const text = await file.text();
-                contentArea.textContent = text;
-            } else {
-                // Handle other file types: read as text (might look like garbage) or provide alternative
-                const text = await file.text();
-                contentArea.textContent = `Cannot render this file type in-line. Displaying raw text:\n\n${text.substring(0, 2000)}...`;
+                alert('Pop-up blocked! Please allow pop-ups for this site.');
             }
         }
     </script>
+</head>
+<body>
+    <h1>Click the button to open a new window</h1>
+    <!-- Call the JavaScript function on button click -->
+    <button onclick="openNewWindow()">Open Subframe/Pop-up</button>
 </body>
 </html>
