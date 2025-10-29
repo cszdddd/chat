@@ -3,179 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title> </title>
-    <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: #f0f2f5; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        #chat-container { width: 90%; max-width: 600px; height: 90%; background: white; box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 12px; display: flex; flex-direction: column; overflow: hidden; }
-        #message-list { flex-grow: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
-        .message { display: flex; gap: 10px; align-items: flex-start; }
-        .message-content { padding: 12px; border-radius: 20px; max-width: 75%; position: relative; word-wrap: break-word; }
-        .message.mine .message-content { background-color: #007bff; color: white; align-self: flex-end; border-bottom-right-radius: 5px; }
-        .message.other .message-content { background-color: #e4e6eb; color: #1c1e21; align-self: flex-start; border-bottom-left-radius: 5px; }
-        .message.mine { flex-direction: row-reverse; }
-        .message img { max-width: 100%; max-height: 200px; border-radius: 12px; cursor: pointer; }
-        .message .username { font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #65676b; }
-        .message.mine .username { color: #8ab4f8; }
-        .input-area { padding: 20px; border-top: 1px solid #ddd; background: #fff; display: flex; gap: 10px; align-items: center; }
-        #username-input, #message-input { flex-grow: 1; border: 1px solid #ccc; border-radius: 20px; padding: 10px 15px; font-size: 16px; }
-        #username-input::placeholder, #message-input::placeholder { color: #999; }
-        #send-button, #image-button { background-color: #007bff; color: white; border: none; padding: 10px 15px; border-radius: 20px; cursor: pointer; transition: background-color 0.2s; }
-        #send-button:hover, #image-button:hover { background-color: #0056b3; }
-        #username-prompt { padding: 40px; text-align: center; }
-        #set-username-button { padding: 10px 20px; border-radius: 20px; border: none; background-color: #28a745; color: white; cursor: pointer; transition: background-color 0.2s; }
-        #set-username-button:hover { background-color: #218838; }
-    </style>
+    <title>Open Any File in Browser</title>
 </head>
 <body>
-
-<div id="chat-container">
-    <div id="username-prompt">
-        <h2>Set Your Username</h2>
-        <input type="text" id="username-input" placeholder="Enter your name..." />
-        <button id="set-username-button">Join Chat</button>
-    </div>
-
-    <div id="chat-area" style="display:none; flex-direction: column; height: 100%;">
-        <div id="message-list"></div>
-        <div class="input-area">
-            <input type="file" id="image-upload" accept="image/*" style="display: none;" />
-            <button id="image-button">🖼️</button>
-            <input type="text" id="message-input" placeholder="Type a message..." />
-            <button id="send-button">Send</button>
-        </div>
-    </div>
-</div>
-
-<!-- Firebase Configuration -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-<!-- Include Firebase Storage for image uploads -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
-<script>
-    // Your web app's Firebase configuration
-    const firebaseConfig = {
-        apiKey: "AIzaSyAe0hXfAJ0ijKNiGgAVfv4zG1ngADF2E4c",
-        authDomain: "chatapp-90c78.firebaseapp.com",
-        projectId: "chatapp-90c78",
-        storageBucket: "chatapp-90c78.appspot.com",
-        messagingSenderId: "195015101932",
-        appId: "1:195015101932:web:f352296f341c58458a84c9",
-        databaseURL: "https://chatapp-90c78-default-rtdb.firebaseio.com"
-    };
-
-    // Initialize Firebase
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    const storage = firebase.storage();
-    const messagesRef = db.ref('messages');
+    <h1>Open Any File</h1>
+    <p>Click the button below to select a file. The content will be displayed below.</p>
+    <button onclick="openFile()">Open File</button>
     
-    let username = '';
+    <!-- Area to display file content -->
+    <h2>File Content:</h2>
+    <div id="fileContent" style="border: 1px solid #ccc; padding: 10px; min-height: 200px; white-space: pre-wrap; font-family: monospace;">
+        <!-- Content will be loaded here -->
+    </div>
+    <p id="status"></p>
 
-    const usernamePrompt = document.getElementById('username-prompt');
-    const chatArea = document.getElementById('chat-area');
-    const usernameInput = document.getElementById('username-input');
-    const setUsernameButton = document.getElementById('set-username-button');
-    const messageList = document.getElementById('message-list');
-    const messageInput = document.getElementById('message-input');
-    const sendButton = document.getElementById('send-button');
-    const imageUpload = document.getElementById('image-upload');
-    const imageButton = document.getElementById('image-button');
+    <script>
+        async function openFile() {
+            document.getElementById('status').textContent = '';
+            document.getElementById('fileContent').textContent = 'Loading file...';
 
-    setUsernameButton.addEventListener('click', () => {
-        const inputName = usernameInput.value.trim();
-        if (inputName) {
-            username = inputName;
-            usernamePrompt.style.display = 'none';
-            chatArea.style.display = 'flex';
-            loadMessages();
-        }
-    });
-
-    sendButton.addEventListener('click', sendMessage);
-    imageButton.addEventListener('click', () => imageUpload.click());
-    imageUpload.addEventListener('change', uploadImage);
-    messageInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-
-    function sendMessage() {
-        const messageText = messageInput.value.trim();
-        if (messageText) {
-            messagesRef.push({
-                username: username,
-                text: messageText,
-                timestamp: firebase.database.ServerValue.TIMESTAMP
-            });
-            messageInput.value = '';
-        }
-    }
-
-    function uploadImage(event) {
-        const file = event.target.files[0];
-        if (file) {
-            const storageRef = storage.ref(`images/${Date.now()}_${file.name}`);
-            const uploadTask = storageRef.put(file);
-
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    // You can add a progress indicator here if desired
-                },
-                (error) => {
-                    console.error("Image upload failed", error);
-                },
-                () => {
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        messagesRef.push({
-                            username: username,
-                            imageUrl: downloadURL,
-                            timestamp: firebase.database.ServerValue.TIMESTAMP
-                        });
-                    });
+            if ('showOpenFilePicker' in window) {
+                // Modern approach using File System Access API
+                try {
+                    const [fileHandle] = await window.showOpenFilePicker();
+                    const file = await fileHandle.getFile();
+                    await displayFileContent(file);
+                } catch (err) {
+                    if (err.name !== 'AbortError') {
+                        document.getElementById('status').textContent = 'Error: ' + err.message;
+                    } else {
+                        document.getElementById('fileContent').textContent = '';
+                    }
                 }
-            );
-        }
-    }
-
-    function loadMessages() {
-        messagesRef.on('child_added', (snapshot) => {
-            const messageData = snapshot.val();
-            const messageElement = document.createElement('div');
-            messageElement.classList.add('message');
-            if (messageData.username === username) {
-                messageElement.classList.add('mine');
             } else {
-                messageElement.classList.add('other');
+                // Fallback approach using a hidden input element
+                useInputFallback();
             }
-            
-            const contentDiv = document.createElement('div');
-            contentDiv.classList.add('message-content');
+        }
 
-            const usernameSpan = document.createElement('div');
-            usernameSpan.classList.add('username');
-            usernameSpan.textContent = messageData.username;
-            contentDiv.appendChild(usernameSpan);
+        function useInputFallback() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.onchange = async (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    await displayFileContent(file);
+                } else {
+                    document.getElementById('fileContent').textContent = '';
+                }
+            };
+            input.click();
+        }
 
-            if (messageData.text) {
-                const textSpan = document.createElement('span');
-                textSpan.textContent = messageData.text;
-                contentDiv.appendChild(textSpan);
+        async function displayFileContent(file) {
+            document.getElementById('status').textContent = 'File selected: ' + file.name + ' (' + file.type + ')';
+            const contentArea = document.getElementById('fileContent');
+            contentArea.textContent = 'Displaying file content...'; // Clear previous content
+
+            if (file.type.startsWith('image/')) {
+                // Handle images: display as an img tag
+                const imgUrl = URL.createObjectURL(file);
+                contentArea.innerHTML = `<img src="${imgUrl}" alt="${file.name}" style="max-width: 100%; height: auto;">`;
+            } else if (file.type === 'text/html') {
+                // Handle HTML files: read as text, don't render directly for security/sandbox reasons
+                // You can read the text and display the source code, or use an iframe with a blob URL
+                const text = await file.text();
+                // Displaying source code in a pre-wrap div
+                contentArea.textContent = text;
+            } else if (file.type.startsWith('text/') || file.type === 'application/json') {
+                // Handle text files (txt, css, js, json, etc.): read as text
+                const text = await file.text();
+                contentArea.textContent = text;
+            } else {
+                // Handle other file types: read as text (might look like garbage) or provide alternative
+                const text = await file.text();
+                contentArea.textContent = `Cannot render this file type in-line. Displaying raw text:\n\n${text.substring(0, 2000)}...`;
             }
-
-            if (messageData.imageUrl) {
-                const img = document.createElement('img');
-                img.src = messageData.imageUrl;
-                img.alt = 'Uploaded image';
-                contentDiv.appendChild(img);
-            }
-            
-            messageElement.appendChild(contentDiv);
-            messageList.appendChild(messageElement);
-            messageList.scrollTop = messageList.scrollHeight; // Auto-scroll to latest message
-        });
-    }
-</script>
-
+        }
+    </script>
 </body>
 </html>
