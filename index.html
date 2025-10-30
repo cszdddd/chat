@@ -1,31 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Open Subframe/Pop-up</title>
-    <script>
-        function openNewWindow() {
-            // URL to be opened in the new window.
-            var url = 'https://google.com'; // Replace with your desired URL
-            
-            // Window features: width, height, and minimal UI elements.
-            // Modern browsers may still show an address bar for security.
-            var features = 'width=600,height=400,toolbar=no,menubar=no,location=no,status=no,resizable=yes';
-            
-            // Open the new window/pop-up.
-            var newWindow = window.open(url, '_blank', features);
-            
-            // Check if the pop-up was blocked
-            if (newWindow) {
-                newWindow.focus();
-            } else {
-                alert('Pop-up blocked! Please allow pop-ups for this site.');
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <title>Redirect Button Example</title>
 </head>
 <body>
-    <h1>Click the button to open a new window</h1>
-    <!-- Call the JavaScript function on button click -->
-    <button onclick="openNewWindow()">Open Subframe/Pop-up</button>
+  <button onclick="window.location.href='https://www.google.com';">Go to Google</button>
 </body>
 </html>
