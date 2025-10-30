@@ -1,65 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Open Files on Chromebook</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            flex-direction: column;
-            text-align: center;
-        }
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        #output {
-            margin-top: 20px;
-            white-space: pre-wrap; /* Allows text to wrap and show line breaks */
-            max-width: 80%;
-            border: 1px solid #ccc;
-            padding: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Redirect Button Example</title>
 </head>
 <body>
-    <h1>Open Files on Chromebook</h1>
-    <p>This page demonstrates a secure way to access local files from a web browser.</p>
-    
-    <button id="openFileButton">Open your Files</button>
-    <div id="output"></div>
-
-    <script>
-        document.getElementById('openFileButton').addEventListener('click', async () => {
-            try {
-                // Open the file picker and get a file handle.
-                const [fileHandle] = await window.showOpenFilePicker();
-                
-                // Get the file content.
-                const file = await fileHandle.getFile();
-                const contents = await file.text();
-
-                // Display a message and the file name.
-                document.getElementById('output').textContent = `File "${file.name}" was selected and its content is loaded below:\n\n${contents}`;
-
-            } catch (err) {
-                // Handle cases where the user cancels the file picker.
-                if (err.name === 'AbortError') {
-                    document.getElementById('output').textContent = 'File selection was canceled.';
-                } else {
-                    console.error(err);
-                    document.getElementById('output').textContent = 'An error occurred while opening the file.';
-                }
-            }
-        });
-    </script>
+  <button onclick="window.location.href='https://www.google.com';">Go to Google</button>
 </body>
 </html>
